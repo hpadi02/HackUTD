@@ -1,0 +1,9 @@
+flask
+fastapi
+uvicorn
+numpy
+pandas
+scikit-learn
+tensorflow
+requests
+web3
