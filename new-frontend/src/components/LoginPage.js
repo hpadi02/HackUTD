@@ -1,8 +1,7 @@
-// src/components/LoginPage.js
-// src/components/LoginPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/LoginPage.css";
+import logo from "../assets/HERMES.png"; // Import the logo
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -21,11 +20,14 @@ const LoginPage = () => {
 
   return (
     <div className="login-container">
+      {/* Company Logo */}
+      <div className="company-logo">
+        <img src={logo} alt="Company Logo" className="logo-image" />
+        <p>Your partner in crypto banking.</p>
+      </div>
+
+      {/* Login Box */}
       <div className="login-box">
-        <header className="login-header">
-          <h1>HERMES</h1>
-          <p>Welcome to our website for crypto banking.</p>
-        </header>
         <form onSubmit={handleSubmit}>
           <h2>Welcome</h2>
           <p>Online & Mobile Security</p>

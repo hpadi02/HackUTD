@@ -1,111 +1,144 @@
-/* src/components/LoginPage.css */
+/* General Reset */
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f6f6f6;
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: #f8f9fc; /* Light neutral background */
+}
+
+/* Container Styling */
+.login-container {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom right, #e3f2fd, #f8f9fc); /* Subtle gradient */
+  overflow: hidden;
+}
+
+/* Background Circles Design */
+.login-container::before,
+.login-container::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.login-container::before {
+  width: 600px;
+  height: 600px;
+  background: rgba(8, 104, 48, 0.1); /* Light green */
+  top: -100px;
+  left: -200px;
+}
+
+.login-container::after {
+  width: 400px;
+  height: 400px;
+  background: rgba(8, 104, 48, 0.2); /* Slightly darker green */
+  bottom: -150px;
+  right: -100px;
+}
+
+/* Logo Styling */
+.company-logo {
+  text-align: center;
+  margin-bottom: 40px;
+  z-index: 1;
+}
+
+.company-logo img {
+  width: 500px; /* Adjust width to fit the logo */
+  height: auto; /* Maintain aspect ratio */
+  margin-bottom: -150px;
+}
+
+.company-logo p {
+  font-size: 14px;
+  color: #040404; /* Subtle grey */
+  margin-top: 5px;
+}
+
+/* Login Box */
+.login-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  width: 350px;
+  text-align: center;
+  margin-top: -90px;
+  margin-bottom: 200px;
+}
+
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-group label {
+  font-size: 14px;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #cfd8dc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+/* Button Styling */
+.btn-login {
+  width: 100%;
+  background: #086830;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-login:hover {
+  background: #0a8a45; /* Lighter green for hover effect */
+}
+
+/* Extra Links */
+.extra-links {
+  margin-top: 20px;
+}
+
+.extra-links a {
+  display: block;
+  font-size: 14px;
+  color: #086830;
+  text-decoration: none;
+}
+
+.extra-links a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .company-logo img {
+    width: 120px; /* Shrink logo on smaller screens */
   }
-  
-  .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
+
   .login-box {
-    background: #ffffff;
-    width: 350px;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    text-align: center;
+    width: 90%; /* Reduce login box width for smaller screens */
+    padding: 20px; /* Adjust padding for better spacing */
   }
-  
-  .login-header h1 {
-    font-size: 24px;
-    color: #012909;
-    margin-bottom: 5px;
+
+  .form-group input {
+    padding: 8px; /* Adjust input padding for smaller screens */
   }
-  
-  .login-header p {
-    font-size: 12px;
-    color: #444;
-    margin-bottom: 20px;
-  }
-  
-  h2 {
-    font-size: 22px;
-    margin: 15px 0;
-  }
-  
-  p {
-    font-size: 14px;
-    color: #666;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-    text-align: left;
-  }
-  
-  label {
-    font-size: 14px;
-    color: #333;
-  }
-  
-  input {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  
-  input:focus {
-    outline: none;
-    border-color: #012909;
-  }
-  
-  .form-options {
-    margin: 10px 0;
-    text-align: left;
-  }
-  
-  .form-options label {
-    font-size: 14px;
-    color: #555;
-  }
-  
-  .btn-login {
-    width: 100%;
-    padding: 10px;
-    background-color: #012909;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .btn-login:hover {
-    background-color: #012909;
-  }
-  
-  .extra-links {
-    margin-top: 10px;
-    text-align: center;
-  }
-  
-  .extra-links a {
-    display: block;
-    font-size: 14px;
-    color: #012909;
-    text-decoration: none;
-    margin-top: 5px;
-  }
-  
-  .extra-links a:hover {
-    text-decoration: underline;
-  }
-  
+}
