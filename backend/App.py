@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from backend.models.crypto_predictor import train_model, predict_prices
+from backend.models.crypto_predictor import train_model, predict_prices_with_explainability
 from backend.services.blockchain import BlockchainService
 from backend.services.data_fetcher import DataFetcher  # Importing DataFetcher
 from dotenv import load_dotenv
@@ -14,8 +15,19 @@ rpc_url = os.getenv("RPC_URL")
 if not rpc_url:
     raise ValueError("RPC URL not found in .env file.")
 
-# Initialize FastAPI app and Blockchain Service
+# Initialize FastAPI app
 app = FastAPI()
+
+# Add CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Change this for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize Blockchain Service
 blockchain = BlockchainService(rpc_url)
 
 # Input schema for crypto predictions
@@ -24,15 +36,17 @@ class CryptoPredictionRequest(BaseModel):
     days: int = 90
     future_days: int = 7
 
-@app.post("/crypto/predict")
-def get_crypto_predictions(request: CryptoPredictionRequest):
-    """
-    Endpoint for predicting future cryptocurrency prices.
-    """
-    model, scaler, data = train_model(request.coin, days=request.days, epochs=5)
-    predictions = predict_prices(model, scaler, data, future_days=request.future_days)
-    return predictions.to_dict(orient="records")
-
+@app.post("/crypto/predict_with_explainability")
+def get_predictions_with_explainability(request: CryptoPredictionRequest):
+    try:
+        model, scaler, data = train_model(request.coin, days=request.days, epochs=5)
+        predictions_with_explanations = predict_prices_with_explainability(
+            model, scaler, data, future_days=request.future_days
+        )
+        return predictions_with_explanations.to_dict(orient="records")
+    except Exception as e:
+        print(f"Prediction error: {e}")
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 @app.get("/wallet/create")
 def create_wallet():
     """

@@ -5,6 +5,9 @@ import torch.nn as nn
 from sklearn.preprocessing import MinMaxScaler
 import requests
 import datetime
+import shap
+import time
+
 
 # Define the LSTM Model
 class LSTMModel(nn.Module):
@@ -22,22 +25,26 @@ class LSTMModel(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
 
+
 # Fetch Historical Data
 def fetch_crypto_data(coin: str, vs_currency: str = 'usd', days: int = 90):
-    """
-    Fetch historical price data for a specific cryptocurrency.
-    """
     url = f"https://api.coingecko.com/api/v3/coins/{coin}/market_chart"
     params = {'vs_currency': vs_currency, 'days': days}
-    response = requests.get(url, params=params)
+
+    for _ in range(3):  # Retry up to 3 times
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            prices = response.json()['prices']
+            df = pd.DataFrame(prices, columns=['timestamp', 'price'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            return df
+        elif response.status_code == 429:
+            print("Rate limit exceeded. Retrying in 10 seconds...")
+            time.sleep(10)  # Wait before retrying
+        else:
+            raise Exception(f"Failed to fetch data: {response.status_code} - {response.text}")
     
-    if response.status_code == 200:
-        prices = response.json()['prices']
-        df = pd.DataFrame(prices, columns=['timestamp', 'price'])
-        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-        return df
-    else:
-        raise Exception(f"Failed to fetch data: {response.status_code} - {response.text}")
+    raise Exception("Exceeded maximum retry attempts for API calls.")
 
 # Prepare Data for LSTM
 def prepare_data(data: pd.DataFrame, look_back: int = 60):
@@ -51,8 +58,13 @@ def prepare_data(data: pd.DataFrame, look_back: int = 60):
     for i in range(look_back, len(scaled_data)):
         X.append(scaled_data[i-look_back:i, 0])
         y.append(scaled_data[i, 0])
+
+    # Convert lists to NumPy arrays and then to tensors
+    X = np.array(X)
+    y = np.array(y)
     
     return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.float32), scaler
+
 
 # Train the Model
 def train_model(coin: str, days: int = 90, epochs: int = 10, batch_size: int = 32):
@@ -95,29 +107,49 @@ def train_model(coin: str, days: int = 90, epochs: int = 10, batch_size: int = 3
     
     return model, scaler, data
 
-# Make Predictions
-def predict_prices(model, scaler, data: pd.DataFrame, future_days: int = 7):
+
+def predict_prices_with_explainability(model, scaler, data: pd.DataFrame, future_days: int = 7):
     """
-    Predict future prices using the trained model.
+    Predict future prices using the trained model and explain predictions with SHAP.
     """
     look_back = 60
     last_sequence = data['price'][-look_back:].values.reshape(-1, 1)
     scaled_sequence = scaler.transform(last_sequence)
-    input_seq = torch.tensor(scaled_sequence, dtype=torch.float32).unsqueeze(0)  # Corrected to 3D
+
+    # Ensure the input tensor requires gradients
+    input_seq = torch.tensor(scaled_sequence, dtype=torch.float32, requires_grad=True).unsqueeze(0)
 
     model.eval()
     predictions = []
+    explanations = []
+
+    # Initialize the SHAP explainer once
+    explainer = shap.DeepExplainer(model, input_seq)
+    print("Initialized SHAP explainer.")
+
     with torch.no_grad():
         for _ in range(future_days):
-            # Pass the 3D input (batch_size, sequence_length, input_size) to the LSTM
+            # Predict
             pred = model(input_seq).item()
             predictions.append(pred)
 
-            # Update the input sequence
+            # Explain prediction
+            input_seq.requires_grad_(True)
+            shap_values = explainer.shap_values(input_seq)
+
+            # Convert SHAP values to a serializable format (e.g., list)
+            explanations.append(shap_values[0].tolist())
+
+            # Update input sequence
             new_input = torch.tensor([[pred]], dtype=torch.float32)
             input_seq = torch.cat((input_seq[:, 1:, :], new_input.unsqueeze(0)), dim=1)
 
     predicted_prices = scaler.inverse_transform(np.array(predictions).reshape(-1, 1))
     future_dates = [data['timestamp'].iloc[-1] + datetime.timedelta(days=i) for i in range(1, future_days + 1)]
-    
-    return pd.DataFrame({'date': future_dates, 'predicted_price': predicted_prices.flatten()})
+
+    # Return predictions and explanations in a JSON-serializable format
+    return pd.DataFrame({
+        'date': future_dates,
+        'predicted_price': predicted_prices.flatten(),
+        'explanation': explanations
+    })
