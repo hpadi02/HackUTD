@@ -17,6 +17,23 @@ body {
   overflow: hidden;
 }
 
+/* Add styles for inner circles */
+.inner-circle-1,
+.inner-circle-2 {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+  background: rgba(8, 104, 48, 0.3); /* Slightly darker green for contrast */
+}
+
+/* Inner Circle 1 */
+.inner-circle-1 {
+  width: 300px;
+  height: 300px;
+  top: -50px;
+  left: -100px;
+}
+
 /* Background Circles Design */
 .login-container::before,
 .login-container::after {

@@ -20,6 +20,12 @@ const LoginPage = () => {
 
   return (
     <div className="login-container">
+
+      {/* Add inner circles for additional designs */}
+      <div className="inner-circle-1"></div>
+      <div className="inner-circle-2"></div>
+
+      
       {/* Company Logo */}
       <div className="company-logo">
         <img src={logo} alt="Company Logo" className="logo-image" />
