@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 import numpy as np
 import pandas as pd
 import torch
@@ -123,4 +121,3 @@ def predict_prices(model, scaler, data: pd.DataFrame, future_days: int = 7):
     future_dates = [data['timestamp'].iloc[-1] + datetime.timedelta(days=i) for i in range(1, future_days + 1)]
     
     return pd.DataFrame({'date': future_dates, 'predicted_price': predicted_prices.flatten()})
->>>>>>> Stashed changes
