@@ -2,12 +2,20 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from backend.models.crypto_predictor import train_model, predict_prices
 from backend.services.blockchain import BlockchainService
+from backend.services.data_fetcher import DataFetcher  # Importing DataFetcher
+from dotenv import load_dotenv
+import os
 
+# Load environment variables from .env
+load_dotenv()
 
+# Fetch RPC URL from .env file
+rpc_url = os.getenv("RPC_URL")
+if not rpc_url:
+    raise ValueError("RPC URL not found in .env file.")
+
+# Initialize FastAPI app and Blockchain Service
 app = FastAPI()
-
-# Initialize Blockchain Service
-rpc_url = "https://eth-mainnet.g.alchemy.com/v2/4sLlSsUxxF2ANTGbi0vSEBISVzKDGHkc"
 blockchain = BlockchainService(rpc_url)
 
 # Input schema for crypto predictions
@@ -36,7 +44,6 @@ def create_wallet():
 def get_wallet_balance(wallet_address: str):
     """
     Endpoint for fetching the balance of a wallet.
-    :param wallet_address: The wallet address to check the balance for.
     """
     try:
         balance = blockchain.get_wallet_balance(wallet_address)
@@ -64,10 +71,29 @@ def send_transaction(request: TransactionRequest):
 def get_transaction_status(tx_hash: str):
     """
     Endpoint for checking the status of a transaction.
-    :param tx_hash: The transaction hash to check.
     """
     try:
         status = blockchain.get_transaction_status(tx_hash)
         return {"status": status}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/crypto/price/{coin}")
+def get_real_time_price(coin: str, vs_currency: str = "usd"):
+    """
+    Endpoint for fetching the real-time price of a cryptocurrency.
+    """
+    try:
+        return DataFetcher.fetch_real_time_price(coin, vs_currency)
+    except HTTPException as e:
+        raise e
+
+@app.get("/crypto/historical/{coin}")
+def get_historical_data(coin: str, vs_currency: str = "usd", days: int = 90):
+    """
+    Endpoint for fetching historical price data for a cryptocurrency.
+    """
+    try:
+        return DataFetcher.fetch_historical_data(coin, vs_currency, days).to_dict(orient="records")
+    except HTTPException as e:
+        raise e
