@@ -30,12 +30,12 @@ class DataFetcher:
             )
 
     @staticmethod
-    def fetch_historical_data(coin: str, vs_currency: str = "usd", days: int = 90):
+    def fetch_historical_data(coin: str, vs_currency: str = "usd", timeframe: str = "1y"):
         """
-        Fetch historical price data for a cryptocurrency.
+        Fetch historical price data for a cryptocurrency using a timeframe.
         """
         url = f"{DataFetcher.BASE_URL}/coins/{coin}/market_chart"
-        params = {"vs_currency": vs_currency, "days": days}
+        params = {"vs_currency": vs_currency, "days": timeframe}
         response = requests.get(url, params=params)
 
         if response.status_code == 200:

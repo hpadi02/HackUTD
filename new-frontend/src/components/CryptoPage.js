@@ -1,17 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   LineElement,
   PointElement,
   LinearScale,
   CategoryScale,
-  BarElement,
+  TimeScale,
+  Title,
+  Tooltip,
+  Legend,
 } from "chart.js";
-import { Line, Bar } from "react-chartjs-2";
+import zoomPlugin from "chartjs-plugin-zoom";
+import "chartjs-adapter-date-fns";
 
-// Register the required Chart.js components
-ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, BarElement);
+// Register Chart.js components and plugins
+ChartJS.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  TimeScale,
+  Title,
+  Tooltip,
+  Legend,
+  zoomPlugin
+);
 
 const CryptoPage = () => {
   const [cryptoList] = useState(["bitcoin", "ethereum", "dogecoin", "solana", "cardano"]);
@@ -19,142 +34,99 @@ const CryptoPage = () => {
   const [realTimePrice, setRealTimePrice] = useState(null);
   const [historicalData, setHistoricalData] = useState(null);
   const [predictionData, setPredictionData] = useState(null);
+  const [historicalScale, setHistoricalScale] = useState("1y");
   const [buyAmount, setBuyAmount] = useState("");
   const [sellAmount, setSellAmount] = useState("");
-  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const fetchRealTimePrice = async () => {
     try {
-      const response = await axios.get(
-        `http://127.0.0.1:8000/crypto/price/${selectedCrypto}`,
-        { timeout: 10000 }
-      );
+      const response = await axios.get(`http://127.0.0.1:8000/crypto/price/${selectedCrypto}`);
       setRealTimePrice(response.data.price);
     } catch (error) {
       console.error("Error fetching real-time price:", error);
-      setErrorMessage("Failed to fetch real-time price. Please try again.");
+      setErrorMessage("Failed to fetch real-time price.");
     }
   };
 
   const fetchHistoricalData = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/crypto/historical/${selectedCrypto}?days=90`, { timeout: 10000 });
+      const response = await axios.get(
+        `http://127.0.0.1:8000/crypto/historical/${selectedCrypto}?timeframe=${historicalScale}`
+      );
       setHistoricalData(response.data);
     } catch (error) {
-      if (error.response && error.response.status === 429) {
-        setErrorMessage("Too many requests. Please try again later.");
-      } else {
-        setErrorMessage("Failed to fetch historical data. Please try again.");
-      }
+      console.error("Error fetching historical data:", error);
+      setErrorMessage("Failed to fetch historical data.");
     }
-  };  
+  };
 
-  const fetchPredictions = async () => {
+  const fetchPredictionData = async () => {
     try {
-      const response = await axios.post(
-        `http://127.0.0.1:8000/crypto/predict_with_explainability`,
-        {
-          coin: selectedCrypto,
-          days: 90,
-          future_days: 7,
-        },
-        { timeout: 10000 }
-      );
+      const response = await axios.post(`http://127.0.0.1:8000/crypto/predict_with_explainability`, {
+        coin: selectedCrypto,
+        future_days: 365,
+      });
       setPredictionData(response.data);
     } catch (error) {
       console.error("Error fetching prediction data:", error);
-      setErrorMessage("Failed to fetch prediction data. Please try again.");
+      setErrorMessage("Failed to fetch prediction data.");
     }
   };
 
   useEffect(() => {
-    setLoading(true);
-    setErrorMessage("");
     fetchRealTimePrice();
     fetchHistoricalData();
-    fetchPredictions();
-  }, [selectedCrypto]);
+    fetchPredictionData();
+  }, [selectedCrypto, historicalScale]);
+
+  const handleBuy = () => alert(`You bought ${buyAmount} of ${selectedCrypto}!`);
+  const handleSell = () => alert(`You sold ${sellAmount} of ${selectedCrypto}!`);
 
   const renderHistoricalChart = () => {
-    if (!historicalData) return null;
+    if (!historicalData) return <p>Loading historical data...</p>;
 
     const data = {
       labels: historicalData.map((entry) => new Date(entry.timestamp).toLocaleDateString()),
       datasets: [
         {
-          label: `${selectedCrypto} Price (Last 90 Days)`,
+          label: `${selectedCrypto} Historical Prices`,
           data: historicalData.map((entry) => entry.price),
-          fill: false,
           borderColor: "blue",
-          tension: 0.1,
         },
       ],
     };
 
-    return <Line data={data} />;
+    const options = {
+      responsive: true,
+      plugins: { zoom: { zoom: { wheel: { enabled: true }, mode: "x" } } },
+      scales: { x: { type: "time" } },
+    };
+
+    return <Line data={data} options={options} />;
   };
 
   const renderPredictionChart = () => {
-    if (!predictionData) return null;
+    if (!predictionData) return <p>Loading predictions...</p>;
 
     const data = {
       labels: predictionData.map((entry) => new Date(entry.date).toLocaleDateString()),
       datasets: [
         {
-          label: `${selectedCrypto} Predicted Prices (Next 7 Days)`,
+          label: `${selectedCrypto} Predicted Prices`,
           data: predictionData.map((entry) => entry.predicted_price),
-          fill: false,
           borderColor: "green",
-          tension: 0.1,
         },
       ],
     };
 
-    return <Line data={data} />;
-  };
-
-  const renderFeatureContributions = () => {
-    if (!predictionData) return null;
-
-    // Aggregate feature contributions
-    const explanations = predictionData.map((entry) => entry.explanation);
-    const aggregatedContributions = explanations.reduce((acc, explanation) => {
-      explanation.forEach((value, index) => {
-        acc[index] = (acc[index] || 0) + value;
-      });
-      return acc;
-    }, {});
-
-    const labels = Object.keys(aggregatedContributions).map((key) => `Feature ${parseInt(key) + 1}`);
-    const data = {
-      labels: labels,
-      datasets: [
-        {
-          label: "Feature Contributions",
-          data: Object.values(aggregatedContributions),
-          backgroundColor: "rgba(54, 162, 235, 0.6)",
-        },
-      ],
+    const options = {
+      responsive: true,
+      plugins: { zoom: { zoom: { wheel: { enabled: true }, mode: "x" } } },
+      scales: { x: { type: "time" } },
     };
 
-    return <Bar data={data} />;
-  };
-
-  const handleBuy = () => {
-    if (buyAmount > 0) {
-      alert(`You have bought ${buyAmount} of ${selectedCrypto}!`);
-    } else {
-      alert("Please enter a valid amount to buy.");
-    }
-  };
-
-  const handleSell = () => {
-    if (sellAmount > 0) {
-      alert(`You have sold ${sellAmount} of ${selectedCrypto}!`);
-    } else {
-      alert("Please enter a valid amount to sell.");
-    }
+    return <Line data={data} options={options} />;
   };
 
   return (
@@ -163,10 +135,7 @@ const CryptoPage = () => {
       {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
       <div>
         <label>Select a cryptocurrency: </label>
-        <select
-          value={selectedCrypto}
-          onChange={(e) => setSelectedCrypto(e.target.value)}
-        >
+        <select value={selectedCrypto} onChange={(e) => setSelectedCrypto(e.target.value)}>
           {cryptoList.map((crypto) => (
             <option key={crypto} value={crypto}>
               {crypto}
@@ -174,50 +143,29 @@ const CryptoPage = () => {
           ))}
         </select>
       </div>
-
-      <div style={{ marginTop: "20px" }}>
+      <div>
         <h2>Real-Time Price</h2>
-        {realTimePrice ? (
-          <p>
-            {selectedCrypto} is currently priced at ${realTimePrice} USD.
-          </p>
-        ) : (
-          <p>Loading real-time price...</p>
-        )}
+        <p>{realTimePrice ? `$${realTimePrice}` : "Loading real-time price..."}</p>
       </div>
-
-      <div style={{ marginTop: "20px" }}>
+      <div>
         <h2>Historical Data</h2>
-        {renderHistoricalChart() || <p>Loading historical data...</p>}
+        <select value={historicalScale} onChange={(e) => setHistoricalScale(e.target.value)}>
+          <option value="1y">1 Year</option>
+          <option value="6m">6 Months</option>
+          <option value="3m">3 Months</option>
+        </select>
+        {renderHistoricalChart()}
       </div>
-
-      <div style={{ marginTop: "20px" }}>
+      <div>
         <h2>Predicted Prices</h2>
-        {renderPredictionChart() || <p>Loading predictions...</p>}
-        <h3>Feature Contributions</h3>
-        {renderFeatureContributions() || <p>Loading feature contributions...</p>}
+        {renderPredictionChart()}
       </div>
-
-      <div style={{ marginTop: "20px" }}>
+      <div>
         <h2>Buy/Sell {selectedCrypto}</h2>
-        <div>
-          <label>Buy Amount: </label>
-          <input
-            type="number"
-            value={buyAmount}
-            onChange={(e) => setBuyAmount(e.target.value)}
-          />
-          <button onClick={handleBuy}>Buy</button>
-        </div>
-        <div style={{ marginTop: "10px" }}>
-          <label>Sell Amount: </label>
-          <input
-            type="number"
-            value={sellAmount}
-            onChange={(e) => setSellAmount(e.target.value)}
-          />
-          <button onClick={handleSell}>Sell</button>
-        </div>
+        <input type="number" value={buyAmount} onChange={(e) => setBuyAmount(e.target.value)} />
+        <button onClick={handleBuy}>Buy</button>
+        <input type="number" value={sellAmount} onChange={(e) => setSellAmount(e.target.value)} />
+        <button onClick={handleSell}>Sell</button>
       </div>
     </div>
   );

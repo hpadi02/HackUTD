@@ -29,7 +29,7 @@ class LSTMModel(nn.Module):
 
 
 # Fetch Historical Data with Retry Logic
-def fetch_crypto_data(coin: str, vs_currency: str = 'usd', days: Union[int, str] = 90):
+def fetch_crypto_data(coin: str, vs_currency: str = 'usd', days: int = 90):
     """
     Fetch historical price data for a cryptocurrency. Handles rate limits.
     """
@@ -114,7 +114,7 @@ def train_model(coin: str, days: int = 90, epochs: int = 10, batch_size: int = 3
 
 
 # Predict Prices with Explainability
-def predict_prices_with_explainability(model, scaler, data: pd.DataFrame, future_days: int = 7):
+def predict_prices_with_explainability(model, scaler, data: pd.DataFrame, future_days: int = 365):
     """
     Predict future prices using the model and provide explanations via SHAP.
     """
