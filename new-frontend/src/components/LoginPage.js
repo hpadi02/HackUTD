@@ -1,21 +1,19 @@
 // src/components/LoginPage.js
-
-
-
-
-
-
+// src/components/LoginPage.js
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/LoginPage.css";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (username && password) {
       alert(`Welcome, ${username}!`);
+      navigate("/account"); // Redirect to the account page
     } else {
       alert("Please enter both username and password.");
     }
