@@ -1,0 +1,71 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Testing
+coverage/
+.coverage
+htmlcov/
+
+# Production build
+/build
+/dist
+
+# Large binary files
+*.dylib
+*.so
+*.dll
+*.pyd
+
+# Temporary files
+*.log
+*.tmp
+
+# ML model files and large data files
+*.h5
+*.pkl
+*.model
+*.bin
+*.onnx
+*.pt
+*.pth
+*.tfevents.*
+*.index
+*.pb 
