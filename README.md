@@ -23,161 +23,99 @@ HERMES is a modern, AI-powered cryptocurrency trading platform that combines rea
 ![Crypto Dashboard](screenshots/dashboard.png)
 The main dashboard features real-time pricing, an innovative risk assessment meter, and historical data visualization.
 
-## Installation
+## Installation and Setup
 
 ### Prerequisites
-
-- Python 3.8 or higher
-- Node.js 14.0 or higher
-- npm or yarn
+- Python 3.11 or higher
+- Node.js 16 or higher
+- npm (comes with Node.js)
 - Git
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
 
-### Important Note About Virtual Environments
+### Backend Setup
 
-The project uses Python virtual environments to manage dependencies. These environments are local to your machine and should NOT be committed to the repository. The `requirements.txt` file contains all necessary dependencies.
-
-⚠️ Never commit the virtual environment folders (`.venv`, `venv`, etc.) to git!
-
-If you're having issues with large files when pushing to GitHub:
-1. Ensure you have the latest `.gitignore` file
-2. Remove any virtual environment from git tracking:
+1. Create and activate a Python virtual environment:
    ```bash
-   git rm -r --cached .venv
-   git rm -r --cached venv
-   ```
-3. Create a new virtual environment after cloning:
-   ```bash
+   # Create virtual environment
    python -m venv .venv
-   source .venv/bin/activate  # On Unix/macOS
-   # OR
-   .\.venv\Scripts\activate  # On Windows
+
+   # Activate virtual environment
+   # On macOS/Linux:
+   source .venv/bin/activate
+   # On Windows:
+   .\.venv\Scripts\activate
    ```
-4. Install dependencies:
+
+2. Install Python dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-### Detailed Setup Instructions
+3. Set up environment variables:
+   ```bash
+   # Create a .env file in the backend directory
+   touch backend/.env
+   ```
+   Add the following to your `.env` file:
+   ```
+   SECRET_KEY=your_secret_key_here
+   DATABASE_URL=your_database_url_here
+   ```
 
-#### 1. System Preparation
-
-First, ensure you have all required tools installed:
-
-```bash
-# Check Python version
-python --version  # Should be 3.8 or higher
-
-# Check Node.js version
-node --version   # Should be 14.0 or higher
-
-# Check npm version
-npm --version
-```
-
-#### 2. Backend Setup
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/HERMES.git
-cd HERMES
-```
-
-2. Create and activate a virtual environment:
-```bash
-# For Unix/macOS
-python -m venv venv
-source venv/bin/activate
-
-# For Windows
-python -m venv venv
-.\venv\Scripts\activate
-```
-
-3. Install Python dependencies:
-```bash
-pip install --upgrade pip  # Ensure pip is up to date
-pip install -r requirements.txt
-```
-
-4. Verify backend dependencies:
-```bash
-python -c "import fastapi; import uvicorn; print('Dependencies installed successfully!')"
-```
-
-5. Start the FastAPI backend:
-```bash
-cd backend
-uvicorn App:app --reload --host 0.0.0.0 --port 8000
-```
-
-The backend will be available at `http://localhost:8000`
-
-#### 3. Frontend Setup
+### Frontend Setup
 
 1. Navigate to the frontend directory:
-```bash
-cd new-frontend
-```
+   ```bash
+   cd new-frontend
+   ```
 
 2. Install Node.js dependencies:
-```bash
-# Using npm
-npm install
+   ```bash
+   npm install
+   ```
 
-# OR using yarn
-yarn install
-```
+3. Create a `.env` file in the frontend directory:
+   ```bash
+   touch .env
+   ```
+   Add the following to your `.env` file:
+   ```
+   REACT_APP_API_URL=http://localhost:8000
+   ```
 
-3. Create a .env file:
-```bash
-echo "REACT_APP_API_URL=http://localhost:8000" > .env
-```
+### Running the Application
 
-4. Start the development server:
-```bash
-npm start
-```
+1. Start the backend server:
+   ```bash
+   # From the root directory
+   cd backend
+   uvicorn App:app --reload
+   ```
 
-The application will be available at `http://localhost:3000`
+2. Start the frontend development server:
+   ```bash
+   # From the new-frontend directory
+   npm start
+   ```
 
-### Troubleshooting Common Issues
+The application will be available at:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
 
-1. **Backend Dependencies**
-   - If you encounter SSL errors during pip install:
-     ```bash
-     pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
-     ```
-   - For Windows users experiencing build errors:
-     ```bash
-     pip install wheel
-     pip install -r requirements.txt
-     ```
+### Important Notes
 
-2. **Frontend Dependencies**
-   - If you encounter node-gyp errors:
-     ```bash
-     # On Windows
-     npm install --global windows-build-tools
-     
-     # On macOS
-     xcode-select --install
-     ```
-   - Clear npm cache if needed:
-     ```bash
-     npm cache clean --force
-     ```
+1. **Virtual Environments**: 
+   - Always use a virtual environment for Python development
+   - Never commit the virtual environment to git
+   - The `.gitignore` file is configured to exclude virtual environments and other unnecessary files
 
-3. **Running the Application**
-   - If the backend fails to start, check if port 8000 is available:
-     ```bash
-     # On Unix/macOS
-     lsof -i :8000
-     
-     # On Windows
-     netstat -ano | findstr :8000
-     ```
-   - If the frontend fails to connect, verify the backend URL in .env
+2. **Dependencies**:
+   - All Python dependencies are listed in `requirements.txt`
+   - All Node.js dependencies are listed in `package.json`
+   - Run `pip install -r requirements.txt` and `npm install` after cloning the repository
+
+3. **Environment Variables**:
+   - Keep your `.env` files secure and never commit them to git
+   - Create `.env` files from the provided templates
 
 ## Project Structure
 
