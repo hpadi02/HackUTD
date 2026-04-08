@@ -1,0 +1,102 @@
+/* AccountPage.css */
+
+/* General Page Styling */
+body {
+    font-family: "Poppins", sans-serif;
+    background-color: #f5f5f5; /* Light background */
+    color: #333333; /* Dark text */
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Container */
+  .container {
+    padding: 20px;
+  }
+  
+  /* Heading Styling */
+  h1 {
+    text-align: center;
+    color: #2a7d2d; /* Dark green */
+    font-weight: bold;
+    margin-bottom: 30px;
+  }
+  
+  /* Card Styling */
+  .card {
+    border: 1px solid #2a7d2d; /* Dark green border */
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-bottom: 20px;
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+  
+  .card-title {
+    font-size: 1.2rem;
+    color: #2a7d2d; /* Dark green for titles */
+    font-weight: bold;
+  }
+  
+  .card-text {
+    font-size: 1rem;
+    color: #555555; /* Gray for text */
+  }
+  
+  /* Navbar Customization */
+  .navbar {
+    background-color: #ffffff; /* White navbar */
+    border-bottom: 2px solid #2a7d2d; /* Dark green border */
+  }
+  
+  .navbar .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2a7d2d; /* Dark green */
+  }
+  
+  .navbar .nav-link {
+    color: #2a7d2d !important; /* Dark green links */
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+  
+  .navbar .nav-link:hover {
+    color: #1e5a1e !important; /* Darker green on hover */
+  }
+  
+  /* Button Styling */
+  button {
+    background-color: #2a7d2d; /* Dark green button */
+    color: #ffffff; /* White text */
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #1e5a1e; /* Darker green on hover */
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .container {
+      padding: 10px;
+    }
+  
+    h1 {
+      font-size: 1.8rem;
+    }
+  
+    .card-title {
+      font-size: 1rem;
+    }
+  
+    .card-text {
+      font-size: 0.9rem;
+    }
+  }
